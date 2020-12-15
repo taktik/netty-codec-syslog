@@ -26,17 +26,15 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
 
     implementation(group = "org.jetbrains.kotlin", name = "kotlin-reflect")
-    implementation(group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-reactor", version = "1.4.2")
-
-    implementation(group = "com.fasterxml.jackson.core", name = "jackson-databind", version = "2.11.3")
-    implementation(group = "com.fasterxml.jackson.module", name = "jackson-module-kotlin", version = "2.11.3")
-    implementation(group = "com.fasterxml.jackson.dataformat", name = "jackson-dataformat-avro", version = "2.11.3")
-    implementation(group = "com.fasterxml.jackson.datatype", name = "jackson-datatype-jsr310", version = "2.11.3")
-
     implementation(group = "javax.annotation", name = "javax.annotation-api", version = "1.3.2")
 
     compileOnly(group = "io.netty", name = "netty-all", version = "4.1.54.Final")
     compileOnly(group = "org.slf4j", name = "slf4j-api", version = "1.7.21")
+
+    testImplementation(group = "com.fasterxml.jackson.core", name = "jackson-databind", version = "2.11.3")
+    testImplementation(group = "com.fasterxml.jackson.module", name = "jackson-module-kotlin", version = "2.11.3")
+    testImplementation(group = "com.fasterxml.jackson.dataformat", name = "jackson-dataformat-avro", version = "2.11.3")
+    testImplementation(group = "com.fasterxml.jackson.datatype", name = "jackson-datatype-jsr310", version = "2.11.3")
 
     testImplementation(group = "org.junit.jupiter", name = "junit-jupiter-engine", version = "5.0.0")
     testImplementation(group = "org.junit.jupiter", name = "junit-jupiter-api", version = "5.0.0")
