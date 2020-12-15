@@ -15,49 +15,10 @@
  */
 package com.github.jcustenborder.netty.syslog
 
-import java.nio.charset.Charset
-import com.github.jcustenborder.netty.syslog.EncoderHelper
-import io.netty.buffer.ByteBuf
-import kotlin.jvm.JvmOverloads
-import java.time.ZoneId
-import java.lang.ThreadLocal
-import com.github.jcustenborder.netty.syslog.SyslogRequest
-import com.github.jcustenborder.netty.syslog.MessageParser.MatcherInheritableThreadLocal
-import com.github.jcustenborder.netty.syslog.MessageParser
-import java.time.temporal.TemporalAccessor
-import java.time.temporal.TemporalQuery
-import java.time.OffsetDateTime
-import java.time.ZoneOffset
-import java.time.temporal.ChronoField
-import java.time.DateTimeException
-import com.github.jcustenborder.netty.syslog.Message.StructuredData
-import java.lang.InheritableThreadLocal
-import java.util.Arrays
-import java.net.InetAddress
-import io.netty.handler.codec.MessageToMessageEncoder
-import kotlin.Throws
 import io.netty.channel.ChannelHandlerContext
-import com.github.jcustenborder.netty.syslog.CEFMessageParser
-import java.util.LinkedHashMap
-import com.github.jcustenborder.netty.syslog.MessageKey
-import io.netty.handler.codec.LineBasedFrameDecoder
-import com.github.jcustenborder.netty.syslog.SyslogFrameDecoder
-import io.netty.util.CharsetUtil
-import io.netty.util.ByteProcessor
-import com.github.jcustenborder.netty.syslog.RFC3164MessageParser
-import com.github.jcustenborder.netty.syslog.RFC5424MessageParser
-import io.netty.channel.ChannelHandler.Sharable
-import io.netty.channel.SimpleChannelInboundHandler
-import com.github.jcustenborder.netty.syslog.SyslogMessageHandler
-import java.lang.Runnable
-import io.netty.channel.ChannelDuplexHandler
-import io.netty.handler.timeout.IdleStateEvent
-import io.netty.handler.timeout.IdleState
-import com.github.jcustenborder.netty.syslog.SyslogIdleStateHandler
-import io.netty.handler.codec.MessageToMessageDecoder
+import io.netty.handler.codec.MessageToMessageEncoder
 import org.slf4j.LoggerFactory
-import java.lang.Exception
-import java.net.InetSocketAddress
+import java.nio.charset.Charset
 import java.time.format.DateTimeFormatter
 
 class MessageEncoder(val cefDateFormat: DateTimeFormatter) : MessageToMessageEncoder<SyslogMessage>() {

@@ -1,7 +1,7 @@
 {
   "input" : "Mar 12 12:34:23 server7 sshd[27393]: pam_authenticate: error Authentication failed",
   "expected" : {
-    "date" : "2018-03-12T12:34:23",
+    "date" : "2020-03-12T12:34:23",
     "remoteAddress" : "localhost",
     "rawMessage" : "Mar 12 12:34:23 server7 sshd[27393]: pam_authenticate: error Authentication failed",
     "type" : "RFC3164",

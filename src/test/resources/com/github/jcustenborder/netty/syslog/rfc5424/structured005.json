@@ -1,9 +1,9 @@
 {
-  "input" : "<46>1 2018-02-01T20:28:36.836975+00:00 miner-01 rsyslogd - - - rsyslogd's groupid changed to 108",
+  "input" : "<46>1 2020-02-01T20:28:36.836975+00:00 miner-01 rsyslogd - - - rsyslogd's groupid changed to 108",
   "expected" : {
-    "date" : "2018-02-01T20:28:36.836975",
+    "date" : "2020-02-01T20:28:36.836975",
     "remoteAddress" : "localhost",
-    "rawMessage" : "<46>1 2018-02-01T20:28:36.836975+00:00 miner-01 rsyslogd - - - rsyslogd's groupid changed to 108",
+    "rawMessage" : "<46>1 2020-02-01T20:28:36.836975+00:00 miner-01 rsyslogd - - - rsyslogd's groupid changed to 108",
     "type" : "RFC5424",
     "level" : 6,
     "version" : 1,

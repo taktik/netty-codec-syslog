@@ -15,8 +15,6 @@
  */
 package com.github.jcustenborder.netty.syslog
 
-import com.github.jcustenborder.netty.syslog.Message.StructuredData
-import com.github.jcustenborder.netty.syslog.MessageParser
 import org.slf4j.LoggerFactory
 import java.time.DateTimeException
 import java.time.LocalDateTime
@@ -91,10 +89,10 @@ abstract class MessageParser @JvmOverloads constructor(private val zoneId: ZoneI
         return result
     }
 
-    protected fun parseStructuredData(structuredData: String?): List<StructuredData> {
+    protected fun parseStructuredData(structuredData: String?): List<SyslogMessage.StructuredData> {
         log.trace("parseStructuredData() - structuredData = '{}'", structuredData)
         val matcher = matcherStructuredData.get().reset(structuredData)
-        val result: MutableList<StructuredData> = LinkedList()
+        val result: MutableList<SyslogMessage.StructuredData> = LinkedList()
         while (matcher.find()) {
             val input = matcher.group(1)
             log.trace("parseStructuredData() - input = '{}'", input)

@@ -19,10 +19,8 @@ import com.github.jcustenborder.netty.syslog.Priority.facility
 import com.github.jcustenborder.netty.syslog.Priority.level
 import com.github.jcustenborder.netty.syslog.Priority.priority
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.DynamicTest
 import org.junit.jupiter.api.TestFactory
-import java.util.*
 import java.util.stream.Stream
 
 class PriorityTest {
@@ -66,17 +64,13 @@ class PriorityTest {
     }
 
     companion object {
-        var testCases: List<TestCase>? = null
-        @BeforeAll
-        fun before() {
-            testCases = Arrays.asList(
-                priority(13, 1, 5),
-                priority(46, 5, 6),
-                priority(30, 3, 6),
-                priority(86, 10, 6),
-                priority(0, 0, 0)
-            )
-        }
+        var testCases: List<TestCase> = listOf(
+            priority(13, 1, 5),
+            priority(46, 5, 6),
+            priority(30, 3, 6),
+            priority(86, 10, 6),
+            priority(0, 0, 0)
+        )
 
         fun priority(expected: Int, facility: Int, level: Int): TestCase {
             return TestCase(expected, facility, level)

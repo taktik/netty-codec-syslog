@@ -1,5 +1,12 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
+val compileKotlin: KotlinCompile by tasks
+val compileTestKotlin: KotlinCompile by tasks
+
+val repoUsername: String by project
+val repoPassword: String by project
+val mavenReleasesRepository: String by project
+
 plugins {
     java
     `maven-publish`
@@ -16,28 +23,34 @@ repositories {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-reflect")
-    implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor:1.4.2")
-    implementation("com.fasterxml.jackson.core:jackson-databind:2.11.3")
-    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.11.3")
-    implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-avro:2.11.3")
-    implementation("javax.annotation:javax.annotation-api:1.3.2")
-    testImplementation("org.junit.jupiter:junit-jupiter-engine:5.0.0")
-    testImplementation("org.junit.jupiter:junit-jupiter-api:5.0.0")
-    testImplementation("org.mockito:mockito-core:2.18.3")
-    testImplementation("ch.qos.logback:logback-classic:1.1.8")
-    testImplementation("org.graylog2:syslog4j:0.9.60")
-    compileOnly("io.netty:netty-all:4.1.54.Final")
-    testCompileOnly("io.netty:netty-all:4.1.54.Final")
-    compileOnly("org.slf4j:slf4j-api:1.7.21")
-    testCompileOnly("org.slf4j:slf4j-api:1.7.21")
     implementation(kotlin("stdlib-jdk8"))
+
+    implementation(group = "org.jetbrains.kotlin", name = "kotlin-reflect")
+    implementation(group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-reactor", version = "1.4.2")
+
+    implementation(group = "com.fasterxml.jackson.core", name = "jackson-databind", version = "2.11.3")
+    implementation(group = "com.fasterxml.jackson.module", name = "jackson-module-kotlin", version = "2.11.3")
+    implementation(group = "com.fasterxml.jackson.dataformat", name = "jackson-dataformat-avro", version = "2.11.3")
+    implementation(group = "com.fasterxml.jackson.datatype", name = "jackson-datatype-jsr310", version = "2.11.3")
+
+    implementation(group = "javax.annotation", name = "javax.annotation-api", version = "1.3.2")
+
+    compileOnly(group = "io.netty", name = "netty-all", version = "4.1.54.Final")
+    compileOnly(group = "org.slf4j", name = "slf4j-api", version = "1.7.21")
+
+    testImplementation(group = "org.junit.jupiter", name = "junit-jupiter-engine", version = "5.0.0")
+    testImplementation(group = "org.junit.jupiter", name = "junit-jupiter-api", version = "5.0.0")
+    testImplementation(group = "org.mockito", name = "mockito-core", version = "2.18.3")
+    testImplementation(group = "org.mockito", name = "mockito-inline", version = "2.18.3")
+    testImplementation(group = "ch.qos.logback", name = "logback-classic", version = "1.1.8")
+    testImplementation(group = "org.graylog2", name = "syslog4j", version = "0.9.60")
+    testCompileOnly(group = "io.netty", name = "netty-all", version = "4.1.54.Final")
+    testCompileOnly(group = "org.slf4j", name = "slf4j-api", version = "1.7.21")
 }
 
 group = "com.github.jcustenborder.netty"
-version = "0.3-SNAPSHOT"
 description = "netty-codec-syslog"
+version = "0.4"
 java.sourceCompatibility = JavaVersion.VERSION_11
 
 java {
@@ -45,22 +58,33 @@ java {
     withJavadocJar()
 }
 
-publishing {
-    publications.create<MavenPublication>("maven") {
-        from(components["java"])
-    }
-}
-
-tasks.withType<JavaCompile>() {
+tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
 }
 
-val compileKotlin: KotlinCompile by tasks
 compileKotlin.kotlinOptions {
     jvmTarget = JavaVersion.VERSION_11.toString()
 }
 
-val compileTestKotlin: KotlinCompile by tasks
 compileTestKotlin.kotlinOptions {
     jvmTarget = JavaVersion.VERSION_11.toString()
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("maven") {
+            from(components["java"])
+        }
+    }
+
+    repositories {
+        maven {
+            name = "Taktik"
+            url = uri(mavenReleasesRepository)
+            credentials {
+                username = repoUsername
+                password = repoPassword
+            }
+        }
+    }
 }

@@ -1,7 +1,7 @@
 {
   "input" : "Mar 12 11:44:20 server7 ftpd[25306]: command: QUIT^M",
   "expected" : {
-    "date" : "2018-03-12T11:44:20",
+    "date" : "2020-03-12T11:44:20",
     "remoteAddress" : "localhost",
     "rawMessage" : "Mar 12 11:44:20 server7 ftpd[25306]: command: QUIT^M",
     "type" : "RFC3164",

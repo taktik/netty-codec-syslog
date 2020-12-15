@@ -19,10 +19,10 @@ import io.netty.channel.ChannelHandlerContext
 import io.netty.channel.SimpleChannelInboundHandler
 import java.util.*
 
-class TestSyslogMessageHandler : SimpleChannelInboundHandler<Message>() {
-    var messages: MutableList<Message> = ArrayList(1024)
+class TestSyslogMessageHandler : SimpleChannelInboundHandler<SyslogMessage>() {
+    var messages: MutableList<SyslogMessage> = ArrayList(1024)
     @Throws(Exception::class)
-    override fun channelRead0(channelHandlerContext: ChannelHandlerContext, message: Message) {
+    override fun channelRead0(channelHandlerContext: ChannelHandlerContext, message: SyslogMessage) {
         messages.add(message)
     }
 }

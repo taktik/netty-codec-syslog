@@ -44,7 +44,7 @@ class SyslogMessageHandler @JvmOverloads constructor(
                 }
             }
             log.warn("decode() - Could not parse message. request = '{}'", request)
-            val unparseableMessage: Message = SyslogMessage(
+            val unparseableMessage = SyslogMessage(
                 type = MessageType.UNKNOWN,
                 date = LocalDateTime.now(),
                 rawMessage = request.rawMessage,

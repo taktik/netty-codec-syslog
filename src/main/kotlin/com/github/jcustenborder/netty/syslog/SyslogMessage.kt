@@ -19,27 +19,27 @@ import java.net.InetAddress
 import java.time.LocalDateTime
 
 data class SyslogMessage(
-    override val date: LocalDateTime,
-    override val remoteAddress: InetAddress,
-    override val rawMessage: String,
-    override val type: MessageType,
-    override val level: Int? = null,
-    override val version: Int? = null,
-    override val facility: Int? = null,
-    override val host: String? = null,
-    override val message: String? = null,
-    override val processId: String? = null,
-    override val tag: String? = null,
-    override val messageId: String? = null,
-    override val appName: String? = null,
-    override val structuredData: List<Message.StructuredData>? = null,
-    override val deviceVendor: String? = null,
-    override val deviceProduct: String? = null,
-    override val deviceVersion: String? = null,
-    override val deviceEventClassId: String? = null,
-    override val name: String? = null,
-    override val severity: String? = null,
-    override val extension: Map<String, String>? = null
-) : Message {
-    data class StructuredData(override val id: String? = null, override val structuredDataElements: Map<String, String?>? = null) : Message.StructuredData
+    val date: LocalDateTime,
+    val remoteAddress: InetAddress,
+    val rawMessage: String,
+    val type: MessageType,
+    val level: Int? = null,
+    val version: Int? = null,
+    val facility: Int? = null,
+    val host: String? = null,
+    val message: String? = null,
+    val processId: String? = null,
+    val tag: String? = null,
+    val messageId: String? = null,
+    val appName: String? = null,
+    val structuredData: List<StructuredData>? = null,
+    val deviceVendor: String? = null,
+    val deviceProduct: String? = null,
+    val deviceVersion: String? = null,
+    val deviceEventClassId: String? = null,
+    val name: String? = null,
+    val severity: String? = null,
+    val extension: Map<String, String>? = null
+) {
+    data class StructuredData(val id: String? = null, val structuredDataElements: Map<String, String?>? = null)
 }

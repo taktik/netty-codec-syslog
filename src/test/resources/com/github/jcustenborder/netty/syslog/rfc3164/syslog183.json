@@ -1,7 +1,7 @@
 {
   "input" : "Mar 6 03:48:24 avas dccd[13284]: database cleaning begun",
   "expected" : {
-    "date" : "2018-03-06T03:48:24",
+    "date" : "2020-03-06T03:48:24",
     "remoteAddress" : "localhost",
     "rawMessage" : "Mar 6 03:48:24 avas dccd[13284]: database cleaning begun",
     "type" : "RFC3164",

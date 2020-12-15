@@ -15,7 +15,6 @@
  */
 package com.github.jcustenborder.netty.syslog
 
-import org.junit.jupiter.api.Test
 import java.io.File
 
 class CEFMessageEncoderTest : MessageEncoderTest() {

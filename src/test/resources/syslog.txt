@@ -352,7 +352,7 @@ Mar 7 05:00:00 avas CROND[20095]: (cronjob) CMD (/sbin/dcccollect.sh)
 Mar 7 05:01:01 avas CROND[20187]: (cronjob) CMD (run-parts /etc/cron.hourly)
 Mar 7 05:05:00 avas CROND[20207]: (cronjob) CMD (/usr/bin/mrtg /etc/mrtg/mrtg.cfg)
 Mar 7 05:05:00 avas CROND[20208]: (mailman) CMD (/usr/local/bin/python -S /usr/local/mailman/cron/gate_news)
-Mar 7 05:10:00 avas CROND[20242]: (cronjob) CMD (/usr/bin/mrtg /etc/mrtg/mrtg.cfg) 
+Mar 7 05:10:00 avas CROND[20242]: (cronjob) CMD (/usr/bin/mrtg /etc/mrtg/mrtg.cfg)
 Mar 6 03:48:24 avas dccd[19972]: automatic dbclean; starting `dbclean -DPq -i 1189 -L info,local5.notice -L error,local5.err`
 Mar 6 03:48:24 avas dbclean[19972]: 1.2.32 cleaning dcc_db
 Mar 6 03:48:24 avas dccd[13284]: database cleaning begun
@@ -403,19 +403,19 @@ Mar 8 03:52:04 avas dccd[13284]: 1.2.32 database /home/dcc/dcc_db reopened with 
 Mar 8 08:24:29 avas dccifd[19670]: write(MTA socket,4): Broken pipe
 Mar 8 10:24:35 avas dccifd[25077]: write(MTA socket,4): Broken pipe
 Mar 8 10:24:42 avas dccifd[25083]: write(MTA socket,4): Broken pipe
-<46>1 2018-02-01T20:28:36.837100+00:00 miner-01 rsyslogd - - -  [origin software=\"rsyslogd\" swVersion=\"8.16.0\" x-pid=\"15651\" x-info=\"http://www.rsyslog.com\"] start
-<30>1 2018-02-01T20:28:36.832779+00:00 miner-01 systemd 1 - -  Stopping System Logging Service...
-<30>1 2018-02-01T20:28:36.834309+00:00 miner-01 systemd 1 - -  Stopped System Logging Service.
-<30>1 2018-02-01T20:28:36.834553+00:00 miner-01 systemd 1 - -  Starting System Logging Service...
-<30>1 2018-02-01T20:28:36.837251+00:00 miner-01 systemd 1 - -  Started System Logging Service.
-<46>1 2018-02-01T20:28:36.836975+00:00 miner-01 rsyslogd - - - rsyslogd's groupid changed to 108
-<46>1 2018-02-01T20:28:36.837039+00:00 miner-01 rsyslogd - - - rsyslogd's userid changed to 104
-<43>1 2018-02-01T20:28:36.837700+00:00 miner-01 rsyslogd-2039 - - - Could not open output pipe '/dev/xconsole':: No such file or directory [v8.16.0 try http://www.rsyslog.com/e/2039 ]
-<44>1 2018-02-01T20:28:36.837726+00:00 miner-01 rsyslogd-2007 - - - action 'action 10' suspended, next retry is Thu Feb  1 20:29:06 2018 [v8.16.0 try http://www.rsyslog.com/e/2007 ]
-<86>1 2018-02-01T20:28:36.838555+00:00 miner-01 sudo - - -  pam_unix(sudo:session): session closed for user root
-<85>1 2018-02-01T20:28:52.350767+00:00 miner-01 sudo - - -    jeremy : TTY=pts/0 ; PWD=/etc/rsyslog.d ; USER=root ; COMMAND=/bin/cat /var/log/syslog-all
-<86>1 2018-02-01T20:28:52.350959+00:00 miner-01 sudo - - -  pam_unix(sudo:session): session opened for user root by jeremy(uid=0)
-<86>1 2018-02-01T20:28:52.351979+00:00 miner-01 sudo - - -  pam_unix(sudo:session): session closed for user root
+<46>1 2020-02-01T20:28:36.837100+00:00 miner-01 rsyslogd - - -  [origin software=\"rsyslogd\" swVersion=\"8.16.0\" x-pid=\"15651\" x-info=\"http://www.rsyslog.com\"] start
+<30>1 2020-02-01T20:28:36.832779+00:00 miner-01 systemd 1 - -  Stopping System Logging Service...
+<30>1 2020-02-01T20:28:36.834309+00:00 miner-01 systemd 1 - -  Stopped System Logging Service.
+<30>1 2020-02-01T20:28:36.834553+00:00 miner-01 systemd 1 - -  Starting System Logging Service...
+<30>1 2020-02-01T20:28:36.837251+00:00 miner-01 systemd 1 - -  Started System Logging Service.
+<46>1 2020-02-01T20:28:36.836975+00:00 miner-01 rsyslogd - - - rsyslogd's groupid changed to 108
+<46>1 2020-02-01T20:28:36.837039+00:00 miner-01 rsyslogd - - - rsyslogd's userid changed to 104
+<43>1 2020-02-01T20:28:36.837700+00:00 miner-01 rsyslogd-2039 - - - Could not open output pipe '/dev/xconsole':: No such file or directory [v8.16.0 try http://www.rsyslog.com/e/2039 ]
+<44>1 2020-02-01T20:28:36.837726+00:00 miner-01 rsyslogd-2007 - - - action 'action 10' suspended, next retry is Thu Feb  1 20:29:06 2018 [v8.16.0 try http://www.rsyslog.com/e/2007 ]
+<86>1 2020-02-01T20:28:36.838555+00:00 miner-01 sudo - - -  pam_unix(sudo:session): session closed for user root
+<85>1 2020-02-01T20:28:52.350767+00:00 miner-01 sudo - - -    jeremy : TTY=pts/0 ; PWD=/etc/rsyslog.d ; USER=root ; COMMAND=/bin/cat /var/log/syslog-all
+<86>1 2020-02-01T20:28:52.350959+00:00 miner-01 sudo - - -  pam_unix(sudo:session): session opened for user root by jeremy(uid=0)
+<86>1 2020-02-01T20:28:52.351979+00:00 miner-01 sudo - - -  pam_unix(sudo:session): session closed for user root
 *Mar  1 00:00:01.137: %VIRTIO-3-INIT_FAIL: Failed to initialize device, PCI 0/6/0/1002 , device is disabled, not supported
 *Mar  1 00:00:01.381: %ATA-6-DEV_FOUND: device 0x1F0
 *Mar  1 00:00:08.485: %ATA-6-DEV_FOUND: device 0x171

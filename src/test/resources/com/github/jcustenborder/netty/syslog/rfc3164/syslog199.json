@@ -1,7 +1,7 @@
 {
   "input" : "Mar 7 03:48:25 avas dbclean[10491]: 1.2.32 cleaning dcc_db",
   "expected" : {
-    "date" : "2018-03-07T03:48:25",
+    "date" : "2020-03-07T03:48:25",
     "remoteAddress" : "localhost",
     "rawMessage" : "Mar 7 03:48:25 avas dbclean[10491]: 1.2.32 cleaning dcc_db",
     "type" : "RFC3164",

@@ -1,7 +1,7 @@
 {
   "input" : "Mar 7 19:01:58 avas dccd[13284]: no outgoing flood connection to dcc1.example.no, server-ID XXXX",
   "expected" : {
-    "date" : "2018-03-07T19:01:58",
+    "date" : "2020-03-07T19:01:58",
     "remoteAddress" : "localhost",
     "rawMessage" : "Mar 7 19:01:58 avas dccd[13284]: no outgoing flood connection to dcc1.example.no, server-ID XXXX",
     "type" : "RFC3164",

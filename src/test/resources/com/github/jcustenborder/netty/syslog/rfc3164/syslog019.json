@@ -1,7 +1,7 @@
 {
   "input" : "Mar 12 08:49:53 server6 ftpd[27281]: FTP LOGIN FROM 111.222.333.444 [111.222.333.444], netscape",
   "expected" : {
-    "date" : "2018-03-12T08:49:53",
+    "date" : "2020-03-12T08:49:53",
     "remoteAddress" : "localhost",
     "rawMessage" : "Mar 12 08:49:53 server6 ftpd[27281]: FTP LOGIN FROM 111.222.333.444 [111.222.333.444], netscape",
     "type" : "RFC3164",

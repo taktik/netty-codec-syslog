@@ -1,7 +1,7 @@
 {
   "input" : "Mar 8 03:50:40 avas dbclean[13362]: expired 3741033 records and 10305510 checksums in /home/dcc/dcc_db",
   "expected" : {
-    "date" : "2018-03-08T03:50:40",
+    "date" : "2020-03-08T03:50:40",
     "remoteAddress" : "localhost",
     "rawMessage" : "Mar 8 03:50:40 avas dbclean[13362]: expired 3741033 records and 10305510 checksums in /home/dcc/dcc_db",
     "type" : "RFC3164",

@@ -1,7 +1,7 @@
 {
   "input" : "Mar 6 03:51:25 avas dbclean[19972]: hashed 9753301 records containing 21909874 checksums, compressed 1316498 records",
   "expected" : {
-    "date" : "2018-03-06T03:51:25",
+    "date" : "2020-03-06T03:51:25",
     "remoteAddress" : "localhost",
     "rawMessage" : "Mar 6 03:51:25 avas dbclean[19972]: hashed 9753301 records containing 21909874 checksums, compressed 1316498 records",
     "type" : "RFC3164",

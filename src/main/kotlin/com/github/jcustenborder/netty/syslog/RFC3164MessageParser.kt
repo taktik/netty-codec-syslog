@@ -15,7 +15,6 @@
  */
 package com.github.jcustenborder.netty.syslog
 
-import java.lang.ThreadLocal
 import org.slf4j.LoggerFactory
 import java.time.LocalDateTime
 import java.util.regex.Matcher
@@ -27,7 +26,7 @@ class RFC3164MessageParser : MessageParser() {
     }
     override fun parse(request: SyslogRequest): SyslogMessage? {
         log.trace("parse() - request = '{}'", request)
-        val matcher = matcherThreadLocal!!.get()!!.reset(request.rawMessage)
+        val matcher = matcherThreadLocal.get().reset(request.rawMessage)
         if (!matcher.find()) {
             log.trace("parse() - Could not match message. request = '{}'", request)
             return null

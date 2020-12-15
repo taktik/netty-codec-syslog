@@ -24,6 +24,7 @@ import org.mockito.Mockito
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.net.InetAddress
+import java.time.LocalDateTime
 import java.util.*
 import java.util.stream.Stream
 
@@ -67,10 +68,10 @@ abstract class MessageParserTest<P : MessageParser?> {
         return Arrays.stream(testsPath.listFiles { p: File -> p.name.endsWith(".json") }).map { file: File ->
             DynamicTest.dynamicTest(file.name) {
                 val testCase = ObjectMapperFactory.INSTANCE!!.readValue(file, TestCase::class.java)
-                val request = Mockito.mock(SyslogRequest::class.java)
-                Mockito.`when`(request.rawMessage).thenReturn(testCase.input)
-                Mockito.`when`(request.remoteAddress).thenReturn(InetAddress.getLoopbackAddress())
-                val actual = parser!!.parse(request)
+
+                val actual = parser!!.parse(SyslogRequest(
+                    receivedDate = LocalDateTime.now(), rawMessage = testCase.input!!, remoteAddress = InetAddress.getLoopbackAddress()
+                ))
                 ObjectMapperFactory.INSTANCE.writeValue(file, testCase)
                 Assertions.assertNotNull(actual, "actual should not be null.")
                 assertMessage(testCase.expected, actual)

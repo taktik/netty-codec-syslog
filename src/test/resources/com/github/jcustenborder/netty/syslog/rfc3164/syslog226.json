@@ -1,7 +1,7 @@
 {
   "input" : "Mar 8 03:51:27 avas dbclean[13362]: 21596160 hash entries total, 12649013 or 58% used",
   "expected" : {
-    "date" : "2018-03-08T03:51:27",
+    "date" : "2020-03-08T03:51:27",
     "remoteAddress" : "localhost",
     "rawMessage" : "Mar 8 03:51:27 avas dbclean[13362]: 21596160 hash entries total, 12649013 or 58% used",
     "type" : "RFC3164",

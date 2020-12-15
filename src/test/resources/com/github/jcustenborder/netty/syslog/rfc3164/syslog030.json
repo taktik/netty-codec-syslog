@@ -1,7 +1,7 @@
 {
   "input" : "Mar 1 00:00:02 avas postfix/smtpd[2410]: lost connection after RCPT from unknown[218.246.34.68]",
   "expected" : {
-    "date" : "2018-03-01T00:00:02",
+    "date" : "2020-03-01T00:00:02",
     "remoteAddress" : "localhost",
     "rawMessage" : "Mar 1 00:00:02 avas postfix/smtpd[2410]: lost connection after RCPT from unknown[218.246.34.68]",
     "type" : "RFC3164",

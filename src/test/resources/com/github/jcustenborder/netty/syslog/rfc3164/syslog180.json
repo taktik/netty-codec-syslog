@@ -1,7 +1,7 @@
 {
   "input" : "Mar 7 05:10:00 avas CROND[20242]: (cronjob) CMD (/usr/bin/mrtg /etc/mrtg/mrtg.cfg) ",
   "expected" : {
-    "date" : "2018-03-07T05:10:00",
+    "date" : "2020-03-07T05:10:00",
     "remoteAddress" : "localhost",
     "rawMessage" : "Mar 7 05:10:00 avas CROND[20242]: (cronjob) CMD (/usr/bin/mrtg /etc/mrtg/mrtg.cfg) ",
     "type" : "RFC3164",

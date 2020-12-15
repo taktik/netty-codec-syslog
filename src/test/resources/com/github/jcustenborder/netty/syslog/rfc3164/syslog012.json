@@ -1,7 +1,7 @@
 {
   "input" : "Mar 10 03:19:48 server5 syslog: su : + tty?? root-informix",
   "expected" : {
-    "date" : "2018-03-10T03:19:48",
+    "date" : "2020-03-10T03:19:48",
     "remoteAddress" : "localhost",
     "rawMessage" : "Mar 10 03:19:48 server5 syslog: su : + tty?? root-informix",
     "type" : "RFC3164",

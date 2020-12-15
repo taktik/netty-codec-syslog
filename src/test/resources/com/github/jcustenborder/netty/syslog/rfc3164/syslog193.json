@@ -1,7 +1,7 @@
 {
   "input" : "Mar 7 00:07:21 avas dccifd[7292]: write(MTA socket,4): Broken pipe",
   "expected" : {
-    "date" : "2018-03-07T00:07:21",
+    "date" : "2020-03-07T00:07:21",
     "remoteAddress" : "localhost",
     "rawMessage" : "Mar 7 00:07:21 avas dccifd[7292]: write(MTA socket,4): Broken pipe",
     "type" : "RFC3164",

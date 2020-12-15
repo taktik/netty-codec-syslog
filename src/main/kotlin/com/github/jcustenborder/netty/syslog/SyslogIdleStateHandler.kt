@@ -15,7 +15,6 @@
  */
 package com.github.jcustenborder.netty.syslog
 
-import com.github.jcustenborder.netty.syslog.SyslogIdleStateHandler
 import io.netty.channel.ChannelDuplexHandler
 import io.netty.channel.ChannelHandler.Sharable
 import io.netty.channel.ChannelHandlerContext
