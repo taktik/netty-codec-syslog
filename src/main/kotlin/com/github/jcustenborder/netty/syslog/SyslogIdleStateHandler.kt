@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,34 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.jcustenborder.netty.syslog;
+package com.github.jcustenborder.netty.syslog
 
-import io.netty.channel.ChannelDuplexHandler;
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.timeout.IdleState;
-import io.netty.handler.timeout.IdleStateEvent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.github.jcustenborder.netty.syslog.SyslogIdleStateHandler
+import io.netty.channel.ChannelDuplexHandler
+import io.netty.channel.ChannelHandler.Sharable
+import io.netty.channel.ChannelHandlerContext
+import io.netty.handler.timeout.IdleState
+import io.netty.handler.timeout.IdleStateEvent
+import org.slf4j.LoggerFactory
 
-@ChannelHandler.Sharable
-class SyslogIdleStateHandler extends ChannelDuplexHandler {
-  private static final Logger log = LoggerFactory.getLogger(SyslogIdleStateHandler.class);
-
-  public static final SyslogIdleStateHandler INSTANCE = new SyslogIdleStateHandler();
-
-  private SyslogIdleStateHandler() {
-
-  }
-
-  @Override
-  public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-    if (evt instanceof IdleStateEvent) {
-      IdleStateEvent e = (IdleStateEvent) evt;
-      if (e.state() == IdleState.WRITER_IDLE) {
-        log.info("Disconnecting {} due to idle timeout.", ctx.channel().remoteAddress());
-        ctx.close();
-      }
+@Sharable
+internal class SyslogIdleStateHandler private constructor() : ChannelDuplexHandler() {
+    @Throws(Exception::class)
+    override fun userEventTriggered(ctx: ChannelHandlerContext, evt: Any) {
+        if (evt is IdleStateEvent) {
+            if (evt.state() == IdleState.WRITER_IDLE) {
+                log.info("Disconnecting {} due to idle timeout.", ctx.channel().remoteAddress())
+                ctx.close()
+            }
+        }
     }
-  }
+
+    companion object {
+        private val log = LoggerFactory.getLogger(SyslogIdleStateHandler::class.java)
+        val INSTANCE = SyslogIdleStateHandler()
+    }
 }

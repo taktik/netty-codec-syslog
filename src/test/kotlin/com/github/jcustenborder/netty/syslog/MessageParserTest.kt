@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,77 +13,72 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.jcustenborder.netty.syslog;
+package com.github.jcustenborder.netty.syslog
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DynamicTest;
-import org.junit.jupiter.api.TestFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.github.jcustenborder.netty.syslog.MessageParserTest
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DynamicTest
+import org.junit.jupiter.api.TestFactory
+import org.mockito.Mockito
+import org.slf4j.LoggerFactory
+import java.io.File
+import java.net.InetAddress
+import java.util.*
+import java.util.stream.Stream
 
-import java.io.File;
-import java.net.InetAddress;
-import java.util.Arrays;
-import java.util.stream.Stream;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.DynamicTest.dynamicTest;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-public abstract class MessageParserTest<P extends MessageParser> {
-  private static final Logger log = LoggerFactory.getLogger(MessageParserTest.class);
-
-  protected P parser;
-
-  @BeforeEach
-  public void setup() {
-    this.parser = createParser();
-  }
-
-  void assertMessage(Message expected, Message actual) {
-    if (null != expected) {
-      assertNotNull(actual, "actual should not be null.");
-    } else {
-      assertNull(actual, "actual should be null.");
-      return;
+abstract class MessageParserTest<P : MessageParser?> {
+    protected var parser: P? = null
+    @BeforeEach
+    fun setup() {
+        parser = createParser()
     }
 
-    assertEquals(expected.facility(), actual.facility(), "facility should match.");
-    assertEquals(expected.level(), actual.level(), "level should match.");
-    assertEquals(expected.remoteAddress(), actual.remoteAddress(), "remoteAddress should match.");
-    assertEquals(expected.date(), actual.date(), "date should match.");
-    assertEquals(expected.rawMessage(), actual.rawMessage(), "rawMessage should match.");
+    fun assertMessage(expected: SyslogMessage?, actual: SyslogMessage?) {
+        if (null != expected) {
+            Assertions.assertNotNull(actual, "actual should not be null.")
+        } else {
+            Assertions.assertNull(actual, "actual should be null.")
+            return
+        }
+        Assertions.assertEquals(expected.facility, actual!!.facility, "facility should match.")
+        Assertions.assertEquals(expected.level, actual.level, "level should match.")
+        Assertions.assertEquals(expected.remoteAddress, actual.remoteAddress, "remoteAddress should match.")
+        Assertions.assertEquals(expected.date, actual.date, "date should match.")
+        Assertions.assertEquals(expected.rawMessage, actual.rawMessage, "rawMessage should match.")
+        Assertions.assertEquals(
+            expected.deviceEventClassId,
+            actual.deviceEventClassId,
+            "deviceEventClassId does not match."
+        )
+        Assertions.assertEquals(expected.deviceProduct, actual.deviceProduct, "deviceProduct does not match.")
+        Assertions.assertEquals(expected.deviceVendor, actual.deviceVendor, "deviceVendor does not match.")
+        Assertions.assertEquals(expected.deviceVersion, actual.deviceVersion, "deviceVersion does not match.")
+        Assertions.assertEquals(expected.name, actual.name, "name does not match.")
+        Assertions.assertEquals(expected.severity, actual.severity, "severity does not match.")
+        Assertions.assertEquals(expected.extension, actual.extension, "extension does not match.")
+    }
 
-    assertEquals(expected.deviceEventClassId(), actual.deviceEventClassId(), "deviceEventClassId does not match.");
-    assertEquals(expected.deviceProduct(), actual.deviceProduct(), "deviceProduct does not match.");
-    assertEquals(expected.deviceVendor(), actual.deviceVendor(), "deviceVendor does not match.");
-    assertEquals(expected.deviceVersion(), actual.deviceVersion(), "deviceVersion does not match.");
-    assertEquals(expected.name(), actual.name(), "name does not match.");
-    assertEquals(expected.severity(), actual.severity(), "severity does not match.");
-    assertEquals(expected.extension(), actual.extension(), "extension does not match.");
-  }
+    protected abstract fun createParser(): P
+    protected abstract fun testsPath(): File
+    @TestFactory
+    fun parse(): Stream<DynamicTest> {
+        val testsPath = testsPath()
+        return Arrays.stream(testsPath.listFiles { p: File -> p.name.endsWith(".json") }).map { file: File ->
+            DynamicTest.dynamicTest(file.name) {
+                val testCase = ObjectMapperFactory.INSTANCE!!.readValue(file, TestCase::class.java)
+                val request = Mockito.mock(SyslogRequest::class.java)
+                Mockito.`when`(request.rawMessage).thenReturn(testCase.input)
+                Mockito.`when`(request.remoteAddress).thenReturn(InetAddress.getLoopbackAddress())
+                val actual = parser!!.parse(request)
+                ObjectMapperFactory.INSTANCE.writeValue(file, testCase)
+                Assertions.assertNotNull(actual, "actual should not be null.")
+                assertMessage(testCase.expected, actual)
+            }
+        }
+    }
 
-  protected abstract P createParser();
-
-  protected abstract File testsPath();
-
-
-  @TestFactory
-  public Stream<DynamicTest> parse() {
-    final File testsPath = testsPath();
-
-    return Arrays.stream(testsPath.listFiles(p -> p.getName().endsWith(".json"))).map(file -> dynamicTest(file.getName(), () -> {
-      final TestCase testCase = ObjectMapperFactory.INSTANCE.readValue(file, TestCase.class);
-      SyslogRequest request = mock(SyslogRequest.class);
-      when(request.rawMessage()).thenReturn(testCase.input);
-      when(request.remoteAddress()).thenReturn(InetAddress.getLoopbackAddress());
-      Message actual = this.parser.parse(request);
-      ObjectMapperFactory.INSTANCE.writeValue(file, testCase);
-      assertNotNull(actual, "actual should not be null.");
-      assertMessage(testCase.expected, actual);
-    }));
-  }
+    companion object {
+        private val log = LoggerFactory.getLogger(MessageParserTest::class.java)
+    }
 }

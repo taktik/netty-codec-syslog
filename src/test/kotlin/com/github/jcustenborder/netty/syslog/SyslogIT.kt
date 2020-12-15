@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,61 +13,62 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.jcustenborder.netty.syslog;
+package com.github.jcustenborder.netty.syslog
 
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.EventLoopGroup;
-import io.netty.channel.nio.NioEventLoopGroup;
-import org.graylog2.syslog4j.SyslogIF;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import io.netty.channel.ChannelFuture
+import io.netty.channel.EventLoopGroup
+import io.netty.channel.nio.NioEventLoopGroup
+import org.graylog2.syslog4j.SyslogIF
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+abstract class SyslogIT {
+    protected abstract fun port(): Int
+    protected abstract fun syslogIF(): SyslogIF
+    @Throws(InterruptedException::class)
+    protected abstract fun setupServer(
+        bossGroup: EventLoopGroup?,
+        workerGroup: EventLoopGroup?,
+        handler: TestSyslogMessageHandler?
+    ): ChannelFuture?
 
-public abstract class SyslogIT {
-  protected abstract int port();
-
-  protected abstract SyslogIF syslogIF();
-
-  protected abstract ChannelFuture setupServer(EventLoopGroup bossGroup, EventLoopGroup workerGroup, TestSyslogMessageHandler handler) throws InterruptedException;
-
-  private EventLoopGroup bossGroup = new NioEventLoopGroup(); // (1)
-  private EventLoopGroup workerGroup = new NioEventLoopGroup(4);
-  protected ChannelFuture channelFuture;
-  protected TestSyslogMessageHandler handler;
-
-  @BeforeEach
-  public void setup() throws InterruptedException {
-    this.bossGroup = new NioEventLoopGroup();
-    this.workerGroup = new NioEventLoopGroup();
-    this.handler = new TestSyslogMessageHandler();
-    this.channelFuture = setupServer(this.bossGroup, this.workerGroup, this.handler);
-    Thread.sleep(500);
-  }
-
-  @Test
-  public void roundtrip() throws InterruptedException {
-    final int count = 100;
-    SyslogIF syslogIF = syslogIF();
-    for (int i = 0; i < count; i++) {
-      syslogIF.info("foo");
+    private var bossGroup: EventLoopGroup = NioEventLoopGroup() // (1)
+    private var workerGroup: EventLoopGroup = NioEventLoopGroup(4)
+    protected var channelFuture: ChannelFuture? = null
+    protected var handler: TestSyslogMessageHandler? = null
+    @BeforeEach
+    @Throws(InterruptedException::class)
+    fun setup() {
+        bossGroup = NioEventLoopGroup()
+        workerGroup = NioEventLoopGroup()
+        handler = TestSyslogMessageHandler()
+        channelFuture = setupServer(bossGroup, workerGroup, handler)
+        Thread.sleep(500)
     }
-    syslogIF.flush();
 
-    final long start = System.currentTimeMillis();
-    while ((System.currentTimeMillis() - start) < 5000 && this.handler.messages.size() < count) {
-      Thread.sleep(100);
+    @Test
+    @Throws(InterruptedException::class)
+    fun roundtrip() {
+        val count = 100
+        val syslogIF = syslogIF()
+        for (i in 0 until count) {
+            syslogIF.info("foo")
+        }
+        syslogIF.flush()
+        val start = System.currentTimeMillis()
+        while (System.currentTimeMillis() - start < 5000 && handler!!.messages.size < count) {
+            Thread.sleep(100)
+        }
+        Assertions.assertEquals(count, handler!!.messages.size)
     }
-    assertEquals(count, this.handler.messages.size());
-  }
 
-
-  @AfterEach
-  public void close() throws InterruptedException {
-    bossGroup.shutdownGracefully();
-    workerGroup.shutdownGracefully();
-    this.channelFuture.channel().closeFuture().sync();
-  }
-
+    @AfterEach
+    @Throws(InterruptedException::class)
+    fun close() {
+        bossGroup.shutdownGracefully()
+        workerGroup.shutdownGracefully()
+        channelFuture!!.channel().closeFuture().sync()
+    }
 }

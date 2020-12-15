@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,159 +13,119 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.jcustenborder.netty.syslog;
+package com.github.jcustenborder.netty.syslog
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import org.apache.avro.reflect.Nullable;
-import org.immutables.value.Value;
-
-import java.net.InetAddress;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Map;
+import java.net.InetAddress
+import java.time.LocalDateTime
 
 /**
  * Represents a standard syslog message.
  */
-public interface Message {
-  /**
-   * Date of the message. This is the parsed date from the client.
-   *
-   * @return Date of the message.
-   */
-  @JsonProperty(required = true)
-  LocalDateTime date();
+interface Message {
+    /**
+     * Date of the message. This is the parsed date from the client.
+     *
+     * @return Date of the message.
+     */
+    val date: LocalDateTime
 
-  /**
-   * IP Address for the sender of the message.
-   *
-   * @return Sender IP Address.
-   */
-  @JsonProperty(required = true)
-  InetAddress remoteAddress();
+    /**
+     * IP Address for the sender of the message.
+     *
+     * @return Sender IP Address.
+     */
+    val remoteAddress: InetAddress
 
-  /**
-   * Unprocessed copy of the message.
-   *
-   * @return Unprocessed message.
-   */
-  @JsonProperty(required = true)
-  String rawMessage();
+    /**
+     * Unprocessed copy of the message.
+     *
+     * @return Unprocessed message.
+     */
+    val rawMessage: String
 
-  /**
-   * @return
-   */
-  @JsonProperty(required = true)
-  MessageType type();
+    /**
+     * @return
+     */
+    val type: MessageType
 
+    /**
+     * Level for the message. Parsed from the message.
+     *
+     * @return Message Level
+     */
+    val level: Int?
 
-  /**
-   * Level for the message. Parsed from the message.
-   *
-   * @return Message Level
-   */
-  @Nullable
-  Integer level();
+    /**
+     * Version of the message.
+     *
+     * @return Message version
+     */
+    val version: Int?
 
-  /**
-   * Version of the message.
-   *
-   * @return Message version
-   */
-  @Nullable
-  Integer version();
+    /**
+     * Facility of the message.
+     *
+     * @return Message facility.
+     */
+    val facility: Int?
 
-  /**
-   * Facility of the message.
-   *
-   * @return Message facility.
-   */
-  @Nullable
-  Integer facility();
+    /**
+     * Host of the message. This is the value from the message.
+     *
+     * @return Message host.
+     */
+    val host: String?
 
-  /**
-   * Host of the message. This is the value from the message.
-   *
-   * @return Message host.
-   */
-  @Nullable
-  String host();
+    /**
+     * Message part of the overall syslog message.
+     *
+     * @return Message part of the overall syslog message.
+     */
+    val message: String?
 
-  /**
-   * Message part of the overall syslog message.
-   *
-   * @return Message part of the overall syslog message.
-   */
-  @Nullable
-  String message();
+    val processId: String?
 
-  @Nullable
-  String processId();
-
-  /*
+    /*
   rfc 3164
    */
-  @Nullable
-  String tag();
+    val tag: String?
 
-  /*
+    /*
   rfc 3164
    */
-
-  /*
+    /*
 rfc 5424
  */
-  @Nullable
-  String messageId();
+    val messageId: String?
 
-  @Nullable
-  String appName();
+    val appName: String?
 
-  @Nullable
-  List<StructuredData> structuredData();
+    val structuredData: List<StructuredData?>?
 
-  /*
+    /*
   CEF
    */
-  @Nullable
-  String deviceVendor();
+    val deviceVendor: String?
 
-      /*
+    /*
   rfc 5424
    */
+    val deviceProduct: String?
 
-  @Nullable
-  String deviceProduct();
+    val deviceVersion: String?
 
-  @Nullable
-  String deviceVersion();
+    val deviceEventClassId: String?
 
-  @Nullable
-  String deviceEventClassId();
+    val name: String?
 
-  @Nullable
-  String name();
+    val severity: String?
 
-  @Nullable
-  String severity();
+    val extension: Map<String, String>?
 
-  @Nullable
-  Map<String, String> extension();
-
-  @Value.Immutable
-  @Value.Style(visibility = Value.Style.ImplementationVisibility.PACKAGE)
-  @JsonSerialize(as = ImmutableStructuredData.class)
-  @JsonDeserialize(as = ImmutableStructuredData.class)
-  interface StructuredData {
-    String id();
-
-    Map<String, String> structuredDataElements();
-  }
-  /*
+    interface StructuredData {
+        val id: String?
+        val structuredDataElements: Map<String, String?>?
+    } /*
   CEF
    */
-
-
 }

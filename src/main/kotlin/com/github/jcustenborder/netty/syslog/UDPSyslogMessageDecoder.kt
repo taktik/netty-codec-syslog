@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,40 +13,69 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.jcustenborder.netty.syslog;
+package com.github.jcustenborder.netty.syslog
 
-import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.socket.DatagramPacket;
-import io.netty.handler.codec.MessageToMessageDecoder;
+import java.nio.charset.Charset
+import com.github.jcustenborder.netty.syslog.EncoderHelper
+import io.netty.buffer.ByteBuf
+import kotlin.jvm.JvmOverloads
+import java.time.ZoneId
+import java.lang.ThreadLocal
+import com.github.jcustenborder.netty.syslog.SyslogRequest
+import com.github.jcustenborder.netty.syslog.MessageParser.MatcherInheritableThreadLocal
+import com.github.jcustenborder.netty.syslog.MessageParser
+import java.time.temporal.TemporalAccessor
+import java.time.temporal.TemporalQuery
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
+import java.time.temporal.ChronoField
+import java.time.DateTimeException
+import com.github.jcustenborder.netty.syslog.Message.StructuredData
+import java.lang.InheritableThreadLocal
+import java.util.Arrays
+import java.net.InetAddress
+import io.netty.handler.codec.MessageToMessageEncoder
+import kotlin.Throws
+import io.netty.channel.ChannelHandlerContext
+import com.github.jcustenborder.netty.syslog.CEFMessageParser
+import java.util.LinkedHashMap
+import com.github.jcustenborder.netty.syslog.MessageKey
+import io.netty.handler.codec.LineBasedFrameDecoder
+import com.github.jcustenborder.netty.syslog.SyslogFrameDecoder
+import io.netty.util.CharsetUtil
+import io.netty.util.ByteProcessor
+import com.github.jcustenborder.netty.syslog.RFC3164MessageParser
+import com.github.jcustenborder.netty.syslog.RFC5424MessageParser
+import io.netty.channel.ChannelHandler.Sharable
+import io.netty.channel.SimpleChannelInboundHandler
+import com.github.jcustenborder.netty.syslog.SyslogMessageHandler
+import java.lang.Runnable
+import io.netty.channel.ChannelDuplexHandler
+import io.netty.handler.timeout.IdleStateEvent
+import io.netty.handler.timeout.IdleState
+import com.github.jcustenborder.netty.syslog.SyslogIdleStateHandler
+import io.netty.channel.socket.DatagramPacket
+import io.netty.handler.codec.MessageToMessageDecoder
+import java.lang.Exception
+import java.net.InetSocketAddress
+import java.time.LocalDateTime
 
-import java.net.InetAddress;
-import java.nio.charset.Charset;
-import java.time.LocalDateTime;
-import java.util.List;
-
-@ChannelHandler.Sharable
-public class UDPSyslogMessageDecoder extends MessageToMessageDecoder<DatagramPacket> {
-  final Charset charset;
-
-  public UDPSyslogMessageDecoder(Charset charset) {
-    this.charset = charset;
-  }
-
-  public UDPSyslogMessageDecoder() {
-    this(Charset.forName("UTF-8"));
-  }
-
-  @Override
-  protected void decode(ChannelHandlerContext channelHandlerContext, DatagramPacket datagramPacket, List<Object> output) throws Exception {
-    final String rawMessage = datagramPacket.content().toString(this.charset);
-    final InetAddress inetAddress = datagramPacket.sender().getAddress();
-    output.add(
-        ImmutableSyslogRequest.builder()
-            .receivedDate(LocalDateTime.now())
-            .rawMessage(rawMessage)
-            .remoteAddress(inetAddress)
-            .build()
-    );
-  }
+@Sharable
+class UDPSyslogMessageDecoder @JvmOverloads constructor(val charset: Charset = Charset.forName("UTF-8")) :
+    MessageToMessageDecoder<DatagramPacket>() {
+    override fun decode(
+        channelHandlerContext: ChannelHandlerContext,
+        datagramPacket: DatagramPacket,
+        output: MutableList<Any>
+    ) {
+        val rawMessage = datagramPacket.content().toString(charset)
+        val inetAddress = datagramPacket.sender().address
+        output.add(
+            SyslogRequest(
+                receivedDate = LocalDateTime.now(),
+                rawMessage = rawMessage,
+                remoteAddress = inetAddress
+            )
+        )
+    }
 }

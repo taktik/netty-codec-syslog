@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,21 +13,21 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.jcustenborder.netty.syslog;
+package com.github.jcustenborder.netty.syslog
 
-class Priority {
-  private Priority() {
-  }
+internal object Priority {
+    @JvmStatic
+    fun facility(priority: Int): Int {
+        return priority shr 3
+    }
 
-  public static int facility(int priority) {
-    return priority >> 3;
-  }
+    @JvmStatic
+    fun level(priority: Int, facility: Int): Int {
+        return priority - (facility shl 3)
+    }
 
-  public static int level(int priority, int facility) {
-    return priority - (facility << 3);
-  }
-
-  public static int priority(int level, int facility) {
-    return (facility * 8) + level;
-  }
+    @JvmStatic
+    fun priority(level: Int, facility: Int): Int {
+        return facility * 8 + level
+    }
 }

@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,24 +13,22 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.jcustenborder.netty.syslog;
+package com.github.jcustenborder.netty.syslog
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.github.jcustenborder.netty.syslog.RFC3164MessageParserTest
+import org.slf4j.LoggerFactory
+import java.io.File
 
-import java.io.File;
+class RFC3164MessageParserTest : MessageParserTest<RFC3164MessageParser>() {
+    override fun createParser(): RFC3164MessageParser {
+        return RFC3164MessageParser()
+    }
 
-public class RFC3164MessageParserTest extends MessageParserTest<RFC3164MessageParser> {
-  private static final Logger log = LoggerFactory.getLogger(RFC3164MessageParserTest.class);
+    override fun testsPath(): File {
+        return File("src/test/resources/com/github/jcustenborder/netty/syslog/rfc3164")
+    }
 
-
-  @Override
-  protected RFC3164MessageParser createParser() {
-    return new RFC3164MessageParser();
-  }
-
-  @Override
-  protected File testsPath() {
-    return new File("src/test/resources/com/github/jcustenborder/netty/syslog/rfc3164");
-  }
+    companion object {
+        private val log = LoggerFactory.getLogger(RFC3164MessageParserTest::class.java)
+    }
 }

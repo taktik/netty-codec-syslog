@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,161 +13,140 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.jcustenborder.netty.syslog;
+package com.github.jcustenborder.netty.syslog
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.nio.charset.Charset
+import com.github.jcustenborder.netty.syslog.EncoderHelper
+import io.netty.buffer.ByteBuf
+import kotlin.jvm.JvmOverloads
+import java.time.ZoneId
+import java.lang.ThreadLocal
+import com.github.jcustenborder.netty.syslog.SyslogRequest
+import com.github.jcustenborder.netty.syslog.MessageParser.MatcherInheritableThreadLocal
+import com.github.jcustenborder.netty.syslog.MessageParser
+import java.time.temporal.TemporalAccessor
+import java.time.temporal.TemporalQuery
+import java.time.OffsetDateTime
+import java.time.ZoneOffset
+import java.time.temporal.ChronoField
+import java.time.DateTimeException
+import com.github.jcustenborder.netty.syslog.Message.StructuredData
+import java.lang.InheritableThreadLocal
+import java.util.Arrays
+import java.net.InetAddress
+import io.netty.handler.codec.MessageToMessageEncoder
+import kotlin.Throws
+import io.netty.channel.ChannelHandlerContext
+import com.github.jcustenborder.netty.syslog.CEFMessageParser
+import java.util.LinkedHashMap
+import com.github.jcustenborder.netty.syslog.MessageKey
+import io.netty.handler.codec.LineBasedFrameDecoder
+import com.github.jcustenborder.netty.syslog.SyslogFrameDecoder
+import io.netty.util.CharsetUtil
+import io.netty.util.ByteProcessor
+import com.github.jcustenborder.netty.syslog.RFC3164MessageParser
+import com.github.jcustenborder.netty.syslog.RFC5424MessageParser
+import io.netty.channel.ChannelHandler.Sharable
+import io.netty.channel.SimpleChannelInboundHandler
+import com.github.jcustenborder.netty.syslog.SyslogMessageHandler
+import java.lang.Runnable
+import io.netty.channel.ChannelDuplexHandler
+import io.netty.handler.timeout.IdleStateEvent
+import io.netty.handler.timeout.IdleState
+import com.github.jcustenborder.netty.syslog.SyslogIdleStateHandler
+import io.netty.handler.codec.MessageToMessageDecoder
+import org.slf4j.LoggerFactory
+import java.net.InetSocketAddress
+import java.time.LocalDateTime
+import java.util.ArrayList
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
+class CEFMessageParser : MessageParser() {
+    private val matcherCEFPrefix: ThreadLocal<Matcher> = ThreadLocal.withInitial { Pattern.compile("^(<(?<priority>\\d+)>)?(?<date>([a-zA-Z]{3}\\s+\\d+\\s+\\d+:\\d+:\\d+)|([0-9T:.Z-]+))\\s+(?<host>\\S+)\\s+CEF:(?<version>\\d+)\\|(?<data>.*)$", 0).matcher("") }
+    private val matcherCEFMain: ThreadLocal<Matcher> = ThreadLocal.withInitial { Pattern.compile("(?<!\\\\)\\|", 0).matcher("") }
+    private val matcherCEFExtension: ThreadLocal<Matcher> = ThreadLocal.withInitial { Pattern.compile("(\\w+)=", 0).matcher("") }
 
-public class CEFMessageParser extends MessageParser {
-  private static final Logger log = LoggerFactory.getLogger(CEFMessageParser.class);
-  private static final String CEF_PREFIX_PATTERN = "^(<(?<priority>\\d+)>)?(?<date>([a-zA-Z]{3}\\s+\\d+\\s+\\d+:\\d+:\\d+)|([0-9T:.Z-]+))\\s+(?<host>\\S+)\\s+CEF:(?<version>\\d+)\\|(?<data>.*)$";
-  private static final String CEF_MAIN_PATTERN = "(?<!\\\\)\\|";
-  private static final String PATTERN_EXTENSION = "(\\w+)=";
-
-  private final ThreadLocal<Matcher> matcherCEFPrefix;
-  private final ThreadLocal<Matcher> matcherCEFMain;
-  private final ThreadLocal<Matcher> matcherCEFExtension;
-
-
-  public CEFMessageParser() {
-    this.matcherCEFPrefix = initMatcher(CEF_PREFIX_PATTERN);
-    this.matcherCEFMain = initMatcher(CEF_MAIN_PATTERN);
-    this.matcherCEFExtension = initMatcher(PATTERN_EXTENSION);
-  }
-
-  List<String> splitToList(String data) {
-    List<String> result = new ArrayList<>(10);
-    final Matcher matcherData = this.matcherCEFMain.get().reset(data);
-
-    int start = 0;
-    int end = 0;
-    while (matcherData.find()) {
-      end = matcherData.end();
-      String part = data.substring(start, end - 1);
-      start = end;
-      result.add(part);
+    fun splitToList(data: String): List<String?> {
+        val result: MutableList<String?> = ArrayList(10)
+        val matcherData = matcherCEFMain.get().reset(data)
+        var start = 0
+        var end = 0
+        while (matcherData.find()) {
+            end = matcherData.end()
+            val part = data.substring(start, end - 1)
+            start = end
+            result.add(part)
+        }
+        if (data.length > end) {
+            result.add(data.substring(end))
+        }
+        while(result.size<7) {
+            result.add(null)
+        }
+        return result
     }
 
-    if (data.length() > end) {
-      result.add(data.substring(end));
+    override fun parse(request: SyslogRequest): SyslogMessage? {
+        log.trace("parse() - request = '{}'", request)
+        val matcherPrefix = matcherCEFPrefix.get().reset(request.rawMessage)
+        if (!matcherPrefix.find()) {
+            log.trace("parse() - Could not match message. request = '{}'", request)
+            return null
+        }
+        log.trace("parse() - Parsed message as CEF.")
+        val groupPriority = matcherPrefix.group("priority")
+        val groupDate = matcherPrefix.group("date")
+        val groupHost = matcherPrefix.group("host")
+        val groupCEFVersion = matcherPrefix.group("version")
+        val groupData = matcherPrefix.group("data")
+        val priority = if (groupPriority == null || groupPriority.isEmpty()) null else groupPriority.toInt()
+        val facility = if (null == priority) null else Priority.facility(priority)
+        val level = if (null == priority) null else Priority.level(priority, facility!!)
+        val date = parseDate(groupDate) ?: LocalDateTime.now()
+        val cefVersion = groupCEFVersion.toInt()
+
+        val tokens = splitToList(groupData).map { it?.replace("\\|", "|") }
+        if (log.isTraceEnabled) {
+            tokens.forEachIndexed { index, s -> log.trace("parse() - index=$index, token=$s") }
+        }
+
+        return SyslogMessage(date = date, remoteAddress = request.remoteAddress, rawMessage = request.rawMessage, type = MessageType.CEF, level = level, version = cefVersion, facility = facility, host = groupHost,
+            deviceVendor = tokens[0], deviceProduct = tokens[1], deviceVersion =  tokens[2], deviceEventClassId = tokens[3], name = tokens[4], severity = tokens[5], extension = tokens[6]?.let { parseExtension(it) }
+        )
     }
 
-    return result;
-  }
-
-  @Override
-  public Message parse(SyslogRequest request) {
-    log.trace("parse() - request = '{}'", request);
-    final Matcher matcherPrefix = this.matcherCEFPrefix.get().reset(request.rawMessage());
-
-    if (!matcherPrefix.find()) {
-      log.trace("parse() - Could not match message. request = '{}'", request);
-      return null;
+    private fun parseExtension(token: String): Map<String, String> {
+        log.trace("parseExtension() - token = '{}'", token)
+        val result: MutableMap<String, String> = LinkedHashMap()
+        if (token.isEmpty()) {
+            return result
+        }
+        val matcher = matcherCEFExtension!!.get()!!.reset(token)
+        var key: String? = null
+        var value: String
+        var lastEnd = -1
+        var lastStart = -1
+        while (matcher.find()) {
+            log.trace("parseExtension() - matcher.start() = {}, matcher.end() = {}", matcher.start(), matcher.end())
+            if (lastEnd > -1) {
+                value = token.substring(lastEnd, matcher.start()).trim { it <= ' ' }
+                key?.let { result[it] = value }
+                log.trace("parseExtension() - key='{}' value='{}'", key, value)
+            }
+            key = matcher.group(1)
+            lastStart = matcher.start()
+            lastEnd = matcher.end()
+        }
+        if (lastStart > -1 && !result.containsKey(key)) {
+            value = token.substring(lastEnd).trim { it <= ' ' }
+            key?.let { result[it] = value }
+            log.trace("parseExtension() - key='{}' value='{}'", key, value)
+        }
+        return result
     }
 
-    log.trace("parse() - Parsed message as CEF.");
-    final String groupPriority = matcherPrefix.group("priority");
-    final String groupDate = matcherPrefix.group("date");
-    final String groupHost = matcherPrefix.group("host");
-    final String groupCEFVersion = matcherPrefix.group("version");
-    final String groupData = matcherPrefix.group("data");
-
-    final Integer priority = (groupPriority == null || groupPriority.isEmpty()) ? null : Integer.parseInt(groupPriority);
-    final Integer facility = null == priority ? null : Priority.facility(priority);
-    final Integer level = null == priority ? null : Priority.level(priority, facility);
-    final LocalDateTime date = parseDate(groupDate);
-    final Integer cefVersion = Integer.parseInt(groupCEFVersion);
-
-    final List<String> parts = splitToList(groupData);
-
-    ImmutableSyslogMessage.Builder builder = ImmutableSyslogMessage.builder();
-    builder.type(MessageType.CEF);
-    builder.rawMessage(request.rawMessage());
-    builder.remoteAddress(request.remoteAddress());
-    builder.date(date);
-    builder.version(cefVersion);
-    builder.host(groupHost);
-    builder.level(level);
-    builder.facility(facility);
-
-    int index = 0;
-    for (String token : parts) {
-      token = token.replace("\\|", "|");
-      log.trace("parse() - index={}, token='{}'", index, token);
-
-      switch (index) {
-        case 0:
-          builder.deviceVendor(token);
-          break;
-        case 1:
-          builder.deviceProduct(token);
-          break;
-        case 2:
-          builder.deviceVersion(token);
-          break;
-        case 3:
-          builder.deviceEventClassId(token);
-          break;
-        case 4:
-          builder.name(token);
-          break;
-        case 5:
-          builder.severity(token);
-          break;
-        case 6:
-          Map<String, String> extension = parseExtension(token);
-          builder.extension(extension);
-          break;
-        default:
-          break;
-      }
-
-      index++;
+    companion object {
+        private val log = LoggerFactory.getLogger(CEFMessageParser::class.java)
     }
-
-    return builder.build();
-  }
-
-  private Map<String, String> parseExtension(String token) {
-    log.trace("parseExtension() - token = '{}'", token);
-    final Map<String, String> result = new LinkedHashMap<>();
-    if (null == token || token.isEmpty()) {
-      return result;
-    }
-
-    Matcher matcher = this.matcherCEFExtension.get().reset(token);
-
-    String key = null;
-    String value;
-    int lastEnd = -1, lastStart = -1;
-
-    while (matcher.find()) {
-      log.trace("parseExtension() - matcher.start() = {}, matcher.end() = {}", matcher.start(), matcher.end());
-
-      if (lastEnd > -1) {
-        value = token.substring(lastEnd, matcher.start()).trim();
-        result.put(key, value);
-        log.trace("parseExtension() - key='{}' value='{}'", key, value);
-      }
-
-      key = matcher.group(1);
-      lastStart = matcher.start();
-      lastEnd = matcher.end();
-    }
-
-    if (lastStart > -1 && !result.containsKey(key)) {
-      value = token.substring(lastEnd).trim();
-      result.put(key, value);
-      log.trace("parseExtension() - key='{}' value='{}'", key, value);
-    }
-
-    return result;
-  }
 }

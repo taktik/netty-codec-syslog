@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,45 +13,29 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.jcustenborder.netty.syslog;
+package com.github.jcustenborder.netty.syslog
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.github.jcustenborder.netty.syslog.Message.StructuredData
+import com.github.jcustenborder.netty.syslog.MessageParser
+import org.slf4j.LoggerFactory
+import java.time.DateTimeException
+import java.time.LocalDateTime
+import java.time.OffsetDateTime
+import java.time.ZoneId
+import java.time.ZoneOffset
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeFormatterBuilder
+import java.time.temporal.ChronoField
+import java.time.temporal.TemporalAccessor
+import java.time.temporal.TemporalQuery
+import java.util.*
+import java.util.regex.Matcher
+import java.util.regex.Pattern
 
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZoneId;
-import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeFormatterBuilder;
-import java.time.temporal.ChronoField;
-import java.time.temporal.TemporalAccessor;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-public abstract class MessageParser {
-  private static final Logger log = LoggerFactory.getLogger(MessageParser.class);
-  private static final String NULL_TOKEN = "-";
-  protected final List<DateTimeFormatter> dateFormats;
-  private final ThreadLocal<Matcher> matcherStructuredData;
-  private final ThreadLocal<Matcher> matcherKeyValue;
-  private final ZoneId zoneId;
-
-  public MessageParser() {
-    this(ZoneId.of("UTC"));
-  }
-
-  public MessageParser(ZoneId zoneId) {
-    this.zoneId = zoneId;
-
-    this.dateFormats = Arrays.asList(
-        DateTimeFormatter.ISO_OFFSET_DATE_TIME,
-
-        //This supports
-        new DateTimeFormatterBuilder()
+abstract class MessageParser @JvmOverloads constructor(private val zoneId: ZoneId = ZoneId.of("UTC")) {
+    protected val dateFormats: List<DateTimeFormatter> = Arrays.asList(
+        DateTimeFormatter.ISO_OFFSET_DATE_TIME,  //This supports
+        DateTimeFormatterBuilder()
             .appendPattern("MMM d")
             .optionalStart()
             .appendPattern("[ yyyy]")
@@ -59,111 +43,91 @@ public abstract class MessageParser {
             .optionalEnd()
             .appendPattern(" HH:mm:ss")
             .toFormatter()
-    );
+    )
+    private val matcherStructuredData: ThreadLocal<Matcher> = ThreadLocal.withInitial { Pattern.compile("\\[([^\\]]+)\\]").matcher("") }
+    private val matcherKeyValue: ThreadLocal<Matcher> = ThreadLocal.withInitial { Pattern.compile("(?<key>\\S+)=\"(?<value>[^\"]+)\"|(?<id>\\S+)").matcher("") }
 
-    this.matcherStructuredData = initMatcher("\\[([^\\]]+)\\]");
-    this.matcherKeyValue = initMatcher("(?<key>\\S+)=\"(?<value>[^\"]+)\"|(?<id>\\S+)");
-  }
+    /**
+     * Method is used to parse an incoming syslog message.
+     *
+     * @param request Incoming syslog request.
+     * @return Object to pass along the pipeline. Null if could not be parsed.
+     */
+    abstract fun parse(request: SyslogRequest): SyslogMessage?
 
-  /**
-   * Method is used to parse an incoming syslog message.
-   *
-   * @param request Incoming syslog request.
-   * @return Object to pass along the pipeline. Null if could not be parsed.
-   */
-  public abstract Message parse(SyslogRequest request);
+    protected fun nullableString(groupText: String): String? {
+        return if (NULL_TOKEN == groupText) null else groupText
+    }
 
-  protected final ThreadLocal<Matcher> initMatcher(String pattern) {
-    return initMatcher(pattern, 0);
-  }
-
-  protected final ThreadLocal<Matcher> initMatcher(String pattern, int flags) {
-    final Pattern p = Pattern.compile(pattern, flags);
-    return new MatcherInheritableThreadLocal(p);
-  }
-
-  protected String nullableString(String groupText) {
-    return NULL_TOKEN.equals(groupText) ? null : groupText;
-  }
-
-  protected LocalDateTime parseDate(String date) {
-    final String cleanDate = date.replaceAll("\\s+", " ");
-    LocalDateTime result = null;
-
-    for (DateTimeFormatter formatter : this.dateFormats) {
-      try {
-        final TemporalAccessor temporal = formatter.parseBest(
-            cleanDate,
-            OffsetDateTime::from,
-            LocalDateTime::from
-        );
-
-        if (temporal instanceof LocalDateTime) {
-          result = ((LocalDateTime) temporal);
-        } else {
-          result = ((OffsetDateTime) temporal).withOffsetSameInstant(ZoneOffset.UTC).toLocalDateTime();
-        }
-        /*
+    protected fun parseDate(date: String): LocalDateTime? {
+        val cleanDate = date.replace("\\s+".toRegex(), " ")
+        var result: LocalDateTime? = null
+        for (formatter in dateFormats) {
+            try {
+                val temporal = formatter.parseBest(
+                    cleanDate,
+                    TemporalQuery<Any> { temporal: TemporalAccessor? -> OffsetDateTime.from(temporal) },
+                    TemporalQuery<Any> { temporal: TemporalAccessor? -> LocalDateTime.from(temporal) })
+                result = if (temporal is LocalDateTime) {
+                    temporal
+                } else {
+                    (temporal as OffsetDateTime).withOffsetSameInstant(ZoneOffset.UTC).toLocalDateTime()
+                }
+                /*
         The parser will output dates that do not have a year. If this happens we default the year
         to 1 AD which I'm pretty sure there were no computers. This means that the sender was a lazy
         ass and didn't sent a date. This is easy to detect so we set it to the current date.
-         */
-
-        if (result.getLong(ChronoField.YEAR_OF_ERA) == 1) {
-          result = result.withYear(LocalDateTime.now(this.zoneId).getYear());
+         */if (result!!.getLong(ChronoField.YEAR_OF_ERA) == 1L) {
+                    result = result.withYear(LocalDateTime.now(zoneId).year)
+                }
+                break
+            } catch (e: DateTimeException) {
+                log.trace("parseDate() - Could not parse '{}' with '{}'", cleanDate, formatter.toString())
+            }
         }
-        break;
-      } catch (java.time.DateTimeException e) {
-        log.trace("parseDate() - Could not parse '{}' with '{}'", cleanDate, formatter.toString());
-      }
-    }
-    if (null == result) {
-      log.error("Could not parse date '{}'", cleanDate);
-    }
-    return result;
-  }
-
-  protected List<Message.StructuredData> parseStructuredData(String structuredData) {
-    log.trace("parseStructuredData() - structuredData = '{}'", structuredData);
-    final Matcher matcher = matcherStructuredData.get().reset(structuredData);
-    final List<Message.StructuredData> result = new ArrayList<>();
-    while (matcher.find()) {
-      final String input = matcher.group(1);
-      log.trace("parseStructuredData() - input = '{}'", input);
-
-      ImmutableStructuredData.Builder builder = ImmutableStructuredData.builder();
-
-      final Matcher kvpMatcher = matcherKeyValue.get().reset(input);
-      while (kvpMatcher.find()) {
-        final String key = kvpMatcher.group("key");
-        final String value = kvpMatcher.group("value");
-        final String id = kvpMatcher.group("id");
-
-        if (null != id && !id.isEmpty()) {
-          log.trace("parseStructuredData() - id='{}'", id);
-          builder.id(id);
-        } else {
-          log.trace("parseStructuredData() - key='{}' value='{}'", key, value);
-          builder.putStructuredDataElements(key, value);
+        if (null == result) {
+            log.error("Could not parse date '{}'", cleanDate)
         }
-      }
-      result.add(builder.build());
-    }
-    return result;
-  }
-
-
-  static class MatcherInheritableThreadLocal extends InheritableThreadLocal<Matcher> {
-    private final Pattern pattern;
-
-    MatcherInheritableThreadLocal(Pattern pattern) {
-      this.pattern = pattern;
+        return result
     }
 
-    @Override
-    protected Matcher initialValue() {
-      return this.pattern.matcher("");
-    }
-  }
+    protected fun parseStructuredData(structuredData: String?): List<StructuredData> {
+        log.trace("parseStructuredData() - structuredData = '{}'", structuredData)
+        val matcher = matcherStructuredData.get().reset(structuredData)
+        val result: MutableList<StructuredData> = LinkedList()
+        while (matcher.find()) {
+            val input = matcher.group(1)
+            log.trace("parseStructuredData() - input = '{}'", input)
 
+            var id: String? = null
+            var dataElements = mutableMapOf<String, String?>()
+
+            val kvpMatcher = matcherKeyValue.get().reset(input)
+            while (kvpMatcher.find()) {
+                val key = kvpMatcher.group("key")
+                val value = kvpMatcher.group("value")
+                val gid = kvpMatcher.group("id")
+                if (null != gid && gid.isNotEmpty()) {
+                    log.trace("parseStructuredData() - id='{}'", id)
+                    id = gid
+                } else {
+                    log.trace("parseStructuredData() - key='{}' value='{}'", key, value)
+                    dataElements[key] = value
+                }
+            }
+            result.add(SyslogMessage.StructuredData(id, dataElements))
+        }
+        return result
+    }
+
+    internal class MatcherInheritableThreadLocal(private val pattern: Pattern) : InheritableThreadLocal<Matcher>() {
+        override fun initialValue(): Matcher {
+            return pattern.matcher("")
+        }
+    }
+
+    companion object {
+        private val log = LoggerFactory.getLogger(MessageParser::class.java)
+        private const val NULL_TOKEN = "-"
+    }
 }

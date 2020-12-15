@@ -5,7 +5,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -13,19 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.github.jcustenborder.netty.syslog;
+package com.github.jcustenborder.netty.syslog
 
-import java.io.File;
+import java.io.File
 
-public class RFC5424MessageParserTest extends MessageParserTest<RFC5424MessageParser> {
-  @Override
-  protected RFC5424MessageParser createParser() {
-    return new RFC5424MessageParser();
-  }
+class RFC5424MessageParserTest : MessageParserTest<RFC5424MessageParser>() {
+    override fun createParser(): RFC5424MessageParser {
+        return RFC5424MessageParser()
+    }
 
-
-  @Override
-  protected File testsPath() {
-    return new File("src/test/resources/com/github/jcustenborder/netty/syslog/rfc5424");
-  }
+    override fun testsPath(): File {
+        return File("src/test/resources/com/github/jcustenborder/netty/syslog/rfc5424")
+    }
 }
